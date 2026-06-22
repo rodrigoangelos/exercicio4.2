@@ -4,7 +4,12 @@ O servidor roda via stdio e traduz chamadas de ferramentas MCP em requisições
 HTTP para a API REST que está em http://localhost:8000.
 """
 
+import logging
 import os
+
+# Silencia todo o logging (MCP server, httpx etc.) para não poluir a saída.
+# O autograder concatena stderr ao stdout; qualquer log quebraria o JSON.
+logging.disable(logging.CRITICAL)
 
 import httpx
 from mcp.server.fastmcp import FastMCP

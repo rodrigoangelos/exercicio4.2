@@ -10,7 +10,13 @@ autograder consiga fazer o parse da saída.
 
 import asyncio
 import json
+import logging
+import os
 import sys
+
+# Silencia todo o logging para não poluir a saída. O autograder concatena
+# stderr ao stdout do processo, então qualquer log quebraria o parse do JSON.
+logging.disable(logging.CRITICAL)
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -42,7 +48,10 @@ async def main() -> None:
         args=["servidor_mcp.py"],
     )
 
-    async with stdio_client(parametros) as (leitura, escrita):
+    # Descarta o stderr do servidor (logs do MCP/httpx) para que nada além do
+    # JSON final chegue ao stdout/stderr do processo.
+    devnull = open(os.devnull, "w")
+    async with stdio_client(parametros, errlog=devnull) as (leitura, escrita):
         async with ClientSession(leitura, escrita) as sessao:
             await sessao.initialize()
 
